@@ -28,11 +28,25 @@ class CommandRegistry:
     def get(self, name):
         return self.commands.get(name)
 
-    def register_all(self):
-        for _, module_name, _ in pkgutil.iter_modules(["commands"]):
-            module = importlib.import_module(f"commands.{module_name}")
-            command_class = getattr(module, "Command")
-            self.register(command_class())
+    def setup_subparsers(self, parser):
+        subparsers = parser.add_subparsers(dest="command", required=True)
+
+        for command in set(self.commands.values()):
+            print("setting up subparser for", command.name)
+            subparser = subparsers.add_parser(
+                command.name, help=command.help, aliases=command.aliases)
+            command.get_parser(subparser)
+
+    def load_from_folder(self, folder, main_parser=None):
+        for _, module_name, _ in pkgutil.iter_modules([f"{folder}"]):
+            module = importlib.import_module(f"{folder}.{module_name}")
+
+            if hasattr(module, "Command"):
+                command_class = getattr(module, "Command")
+                self.register(command_class())
+
+        if(main_parser):
+            self.setup_subparsers(main_parser)
 
     def execute(self, name, args):
         command = self.get(name)
@@ -40,24 +54,20 @@ class CommandRegistry:
             print(f"Unknown command: {name}")
             return
 
-        parser = command.get_parser()
-        command_args = parser.parse_args(args)
-        command.run(command_args)
-
-
-commands = CommandRegistry()
+        command.run(args)
 
 
 def main():
+    command_registry = CommandRegistry()
+
     # Create the main parser
     parser = argparse.ArgumentParser(prog="osc")
-    parser.add_argument("command", type=str, help="The command to run")
 
-    commands.register_all()
+    command_registry.load_from_folder("commands", parser)
+    print(command_registry.commands.keys())
 
-    args, unknown_args = parser.parse_known_args()
-    # execute
-    commands.execute(args.command, unknown_args)
+    args = parser.parse_args()
+    command_registry.execute(args.command, args)
 
 
 if __name__ == "__main__":
