@@ -3,74 +3,76 @@
 
 import argparse
 import importlib
+import os
 import pkgutil
 
 
 class Command:
+    """
+    This program does this and that...
+    """
+
     name = ""
     aliases = []
-    help = ""
 
-    def get_parser(self):
-        raise NotImplementedError("get_parser method not implemented")
-
-    def run(self, *args):
-        raise NotImplementedError("run method not implemented")
-
-
-class CommandRegistry:
-    def __init__(self):
+    def __init__(self, parent=None):
+        self.parent = parent
+        if parent:
+            self.parser = self.parent.subparsers.add_parser(self.name, help=self.get_description(), aliases=self.aliases)
+        else:
+            self.parser = argparse.ArgumentParser(prog=self.name, description=self.get_description())
+        self.subparsers = None
         self.commands = {}
 
-    def register(self, command):
+    def get_description(self):
+        result = self.__doc__ or ""
+        result = result.strip()
+        return result
+
+    def add_parser_arguments(self):
+        raise NotImplementedError()
+
+    def run(self, *args):
+        raise NotImplementedError()
+
+    def register(self, command_class):
+        if not self.subparsers:
+            # instantiate subparsers on first use
+            self.subparsers = self.parser.add_subparsers(dest="command", required=True)
+
+        command = command_class(parent=self)
+        command.add_parser_arguments()
+
         self.commands[command.name] = command
 
         for alias in command.aliases:
             self.commands[alias] = command
 
-    def get(self, name):
-        return self.commands.get(name)
-
-    def setup_subparsers(self, parser):
-        subparsers = parser.add_subparsers(dest="command", required=True)
-
-        for command in set(self.commands.values()):
-            print("setting up subparser for", command.name)
-            subparser = subparsers.add_parser(
-                command.name, help=command.help, aliases=command.aliases)
-            command.get_parser(subparser)
-
-    def load_from_folder(self, folder, main_parser=None):
+    def load_from_folder(self, folder):
         for _, module_name, _ in pkgutil.iter_modules([f"{folder}"]):
+            # XXX: dirty hack; import module by file path
+            folder = os.path.basename(folder)
             module = importlib.import_module(f"{folder}.{module_name}")
 
             if hasattr(module, "Command"):
                 command_class = getattr(module, "Command")
-                self.register(command_class())
+                self.register(command_class)
 
-        if(main_parser):
-            self.setup_subparsers(main_parser)
-
-    def execute(self, name, args):
-        command = self.get(name)
-        if not command:
-            print(f"Unknown command: {name}")
-            return
-
+    def execute(self, args):
+        command = self.commands[args.command]
         command.run(args)
 
 
+class OscMainCommand(Command):
+    name = "osc"
+
+
 def main():
-    command_registry = CommandRegistry()
-
-    # Create the main parser
-    parser = argparse.ArgumentParser(prog="osc")
-
-    command_registry.load_from_folder("commands", parser)
-    print(command_registry.commands.keys())
-
-    args = parser.parse_args()
-    command_registry.execute(args.command, args)
+    main_command = OscMainCommand()
+    topdir = os.path.dirname(__file__)
+    main_command.load_from_folder(os.path.join(topdir, "commands"))
+    args = main_command.parser.parse_args()
+    main_command.execute(args)
 
 
 if __name__ == "__main__":
