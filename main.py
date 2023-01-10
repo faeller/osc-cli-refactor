@@ -9,7 +9,8 @@ import pkgutil
 
 class Command:
     """
-    This program does this and that...
+    Base command which can be extended to create new commands.
+    Descriptions and/or helptexts for these commands are taken from the docstring of the class and parent class if available.
     """
 
     name = ""
@@ -17,12 +18,15 @@ class Command:
 
     def __init__(self, parent=None):
         self.parent = parent
-        if parent:
-            self.parser = self.parent.subparsers.add_parser(self.name, help=self.get_description(), aliases=self.aliases)
-        else:
-            self.parser = argparse.ArgumentParser(prog=self.name, description=self.get_description())
         self.subparsers = None
         self.commands = {}
+
+        if parent:
+            self.parser = self.parent.subparsers.add_parser(
+                self.name, help=self.get_description(), aliases=self.aliases)
+        else:
+            self.parser = argparse.ArgumentParser(
+                prog=self.name, description=self.get_description())
 
     def get_description(self):
         result = self.__doc__ or ""
@@ -38,7 +42,8 @@ class Command:
     def register(self, command_class):
         if not self.subparsers:
             # instantiate subparsers on first use
-            self.subparsers = self.parser.add_subparsers(dest="command", required=True)
+            self.subparsers = self.parser.add_subparsers(
+                dest="command", required=True)
 
         command = command_class(parent=self)
         command.add_parser_arguments()
