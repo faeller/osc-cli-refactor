@@ -77,8 +77,8 @@ class TestRepeatCommand(unittest.TestCase):
                                          help="The message to repeat")
         self.command.parser.add_argument("--count", type=int, default=1,
                                          help="The number of times to repeat the message")
-        self.command.run(self.command.parser.parse_args(
-            ["hello", "--count", "2"]))
+        args = ["hello", "--count", "2"]
+        self.command.run(self.command.parser.parse_args(args))
         self.assertEqual('hello\nhello\n', capture.getvalue())
         sys.stdout = sys.__stdout__
 
