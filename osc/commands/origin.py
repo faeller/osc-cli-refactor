@@ -1,7 +1,7 @@
-from main import Command
+from .. import commandline
 
 
-class OriginCommand(Command):
+class OriginCommand(commandline.Command):
     name = "origin"
 
     def add_parser_arguments(self):

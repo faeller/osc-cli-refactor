@@ -1,7 +1,7 @@
-import main
+from .. import commandline
 
 
-class Command(main.Command):
+class Command(commandline.Command):
     """
     An example command
     """

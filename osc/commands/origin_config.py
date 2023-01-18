@@ -1,14 +1,14 @@
-import main
-import argparse
+from .. import commandline
 
 
-class Command(main.Command):
+class Command(commandline.Command):
     """
     An example command
     """
 
-    name = "example"
-    aliases = ["ex"]
+    name = "config"
+    aliases = ["c"]
+    parent="origin"
 
     def add_parser_arguments(self):
         self.parser.add_argument("--message", type=str,
