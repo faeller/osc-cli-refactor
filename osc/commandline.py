@@ -25,7 +25,7 @@ MODULES = (
 
 class Command:
     """
-    Base command which can be extended to create new commands.
+    Base command class which can be extended to create new commands.
     Descriptions and/or helptexts for these commands are taken from the docstring of the class and parent class if available.
     """
 
@@ -89,7 +89,8 @@ class Command:
                 # TODO: log the failure at least
                 try:
                     spec.loader.exec_module(mod)
-                except:
+                except Exception as e:
+                    print(f"Failed to load module {full_name}: {e}")
                     continue
                 for name in dir(mod):
                     cls = getattr(mod, name)
@@ -116,8 +117,6 @@ class Command:
     def execute(self, args):
         command = self.commands[args.command]
         command.run(args)
-
-
 class OscMainCommand(Command):
     name = "osc"
 
