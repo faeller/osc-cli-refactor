@@ -4,6 +4,11 @@ import inspect
 import os
 import pkgutil
 
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = None
+
 from . import commands
 
 
@@ -39,6 +44,7 @@ class Command:
         else:
             self.parser = argparse.ArgumentParser(
                 prog=self.name, description=self.get_description())
+            self.add_parser_arguments()
 
     def get_description(self):
         result = self.__doc__ or ""
@@ -114,3 +120,14 @@ class Command:
 
 class OscMainCommand(Command):
     name = "osc"
+
+    def add_parser_arguments(self):
+        self.parser.add_argument("-v", "--verbose", action="store_true")
+
+    def enable_autocomplete(self):
+        """
+        The method must be called *after* the parser is populated with options and subcommands.
+        """
+        if not argcomplete:
+            return
+        argcomplete.autocomplete(self.parser)
