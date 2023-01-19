@@ -3,7 +3,7 @@ import argparse
 from .. import commandline
 
 
-class Command(commandline.Command):
+class ExampleCommand(commandline.Command):
     """
     An example command
     """

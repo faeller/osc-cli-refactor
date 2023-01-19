@@ -1,7 +1,7 @@
 from .. import commandline
 
 
-class Command(commandline.Command):
+class RepeatCommand(commandline.Command):
     """
     Repeat a message a specified number of times
     """
