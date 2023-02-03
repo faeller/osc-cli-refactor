@@ -12,16 +12,6 @@ except ImportError:
 from . import commands
 
 
-# TODO: move this to a class (RootCommand?)
-MODULES = (
-    ("osc.commands", commands.__path__[0]),
-    ("osc.commands.usr_lib", "/usr/lib/osc-plugins"),
-    ("osc.commands.usr_local_lib", "/usr/local/lib/osc-plugins"),
-    ("osc.commands.var_lib", "/var/lib/osc-plugins"),  # kept for backwards compatibility
-    ("osc.commands.home_local_lib", os.path.expanduser("~/.local/lib/osc-plugins")),
-    ("osc.commands.home", os.path.expanduser("~/.osc-plugins")),
-)
-
 
 class Command:
     """
@@ -80,9 +70,13 @@ class Command:
 
         return command
 
-    # TODO: move this to another class (RootCommand?)
+
+
+class RootCommand(Command):
+    MODULES = ()
+
     def load_commands(self):
-        for module_prefix, module_path in MODULES:
+        for module_prefix, module_path in self.MODULES:
             for loader, module_name, is_pkg in pkgutil.walk_packages(path=[module_path]):
                 full_name = f"{module_prefix}.{module_name}"
                 spec = loader.find_spec(full_name)
@@ -117,12 +111,19 @@ class Command:
 
     def execute(self, args):
         args.func(args)
-        # command = self.commands[args.command]
-        # command.run(args)
 
 
-class OscMainCommand(Command):
+class OscMainCommand(RootCommand):
     name = "osc"
+
+    MODULES = (
+        ("osc.commands", commands.__path__[0]),
+        ("osc.commands.usr_lib", "/usr/lib/osc-plugins"),
+        ("osc.commands.usr_local_lib", "/usr/local/lib/osc-plugins"),
+        ("osc.commands.var_lib", "/var/lib/osc-plugins"),  # kept for backwards compatibility
+        ("osc.commands.home_local_lib", os.path.expanduser("~/.local/lib/osc-plugins")),
+        ("osc.commands.home", os.path.expanduser("~/.osc-plugins")),
+    )
 
     def add_parser_arguments(self):
         self.parser.add_argument("-v", "--verbose", action="store_true")
