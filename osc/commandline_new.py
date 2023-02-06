@@ -12,11 +12,11 @@ except ImportError:
 from . import commands
 
 
-
 class Command:
     """
     Base command class which can be extended to create new commands.
-    Descriptions and/or helptexts for these commands are taken from the docstring of the class and parent class if available.
+    Descriptions and/or helptexts for these commands are taken from the docstring
+    of the class and parent class if available.
     """
 
     name = ""
@@ -51,7 +51,7 @@ class Command:
     def add_parser_arguments(self):
         raise NotImplementedError()
 
-    def run(self, *args):
+    def run(self, args):
         raise NotImplementedError()
 
     def register(self, command_class):
@@ -71,20 +71,25 @@ class Command:
         return command
 
 
-
 class RootCommand(Command):
     MODULES = ()
 
+    def add_parser_arguments(self):
+        raise NotImplementedError()
+
+    def run(self, args):
+        raise NotImplementedError()
+
     def load_commands(self):
         for module_prefix, module_path in self.MODULES:
-            for loader, module_name, is_pkg in pkgutil.walk_packages(path=[module_path]):
+            for loader, module_name, _ in pkgutil.walk_packages(path=[module_path]):
                 full_name = f"{module_prefix}.{module_name}"
                 spec = loader.find_spec(full_name)
                 mod = importlib.util.module_from_spec(spec)
-                # TODO: log the failure at least
+                # TODO: log the failure
                 try:
                     spec.loader.exec_module(mod)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     print(f"Failed to load module {full_name}: {e}")
                     continue
                 for name in dir(mod):
@@ -102,6 +107,7 @@ class RootCommand(Command):
 
                     parent_name = getattr(cls, "parent", None)
                     if parent_name:
+                        # TODO: handle invalid parent name; possibly skip and log
                         parent = self.root_command.command_classes[parent_name]
                         cmd = parent.register(cls)
                     else:
@@ -132,6 +138,9 @@ class OscMainCommand(RootCommand):
             metavar="URL",
             help="Open Build Service API URL or a configured alias",
         )
+
+    def run(self, args):
+        pass
 
     def enable_autocomplete(self):
         """
