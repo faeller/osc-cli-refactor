@@ -8,7 +8,7 @@ class OriginConfigCommand(commandline.Command):
 
     name = "config"
     aliases = ["c"]
-    parent = "osc.commands.OriginCommand"
+    parent = "OriginCommand"
 
     def add_parser_arguments(self):
         self.parser.add_argument("--message", type=str,

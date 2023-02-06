@@ -8,7 +8,7 @@ class OriginProjectsCommand(commandline.Command):
 
     name = "projects"
     aliases = ["p"]
-    parent = "osc.commands.OriginCommand"
+    parent = "OriginCommand"
 
     def add_parser_arguments(self):
         self.parser.add_argument("--message", type=str,

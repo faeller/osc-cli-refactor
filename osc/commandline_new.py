@@ -99,14 +99,14 @@ class RootCommand(Command):
                     if not issubclass(cls, Command):
                         continue
 
-                    # TODO: parent == class (not a string) ?
-                    # TODO: or allow relative parent references (without specifying a module?)
-                    # the built-in commands are available via osc.commands.<ClassName>
-                    # so they can be easily used as parents
                     mod_cls_name = f"{module_prefix}.{name}"
 
                     parent_name = getattr(cls, "parent", None)
                     if parent_name:
+                        # allow relative references to classes in the the same module/directory
+                        if "." not in parent_name:
+                            parent_name = f"{module_prefix}.{parent_name}"
+
                         # TODO: handle invalid parent name; possibly skip and log
                         parent = self.root_command.command_classes[parent_name]
                         cmd = parent.register(cls)
