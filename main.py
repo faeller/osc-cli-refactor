@@ -19,11 +19,7 @@ def main():
             main_command.register(legacy_command)
 
     main_command.enable_autocomplete()
-    # try:
     args = main_command.parser.parse_args()
-    # except:
-    #     parser.print_help()
-    #     main_command.parser.error("Please specify a command")
     main_command.execute(args)
 
 
