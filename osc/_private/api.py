@@ -1,7 +1,27 @@
+from .. import oscerr
+from .. import store as osc_store
+from .. import conf as osc_conf
+
 """
 Functions that communicate with OBS API
 and work with related XML data.
 """
+
+
+# TODO (lau): write docstring 
+def get_apiurl(args=None):
+    if args and args.apiurl:
+        return args.apiurl
+    
+    # TODO (lau): handle aliases
+    
+    try:
+        store = osc_store.Store()
+        return store.apiurl
+    except oscerr.NoWorkingCopy:
+        pass
+    
+    return osc_conf.config['apiurl']
 
 
 def get(apiurl, path, query=None):
