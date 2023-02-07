@@ -11,6 +11,7 @@ def convert_osc_do_function_to_command_class(func):
     class CompatabilityWrappedCommand(Command):
         _func = func
         name = _func.__name__[3:]
+        aliases = getattr(_func, "aliases", [])
 
         def __repr__(self):
             result = super().__repr__()
@@ -46,13 +47,6 @@ def get_all_compat_wrapped_commands():
             continue
 
         commands.append(convert_osc_do_function_to_command_class(func))
-        
-        # debug
-
-        # if name == "do_version":
-        #     return commands
-
-        
     return commands
 
 
