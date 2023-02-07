@@ -7,8 +7,8 @@ def call_osc_babysitter_if_compat_failed():
     pass
 
 
-def convert_osc_do_function_to_command_class(func):
-    class CompatabilityWrappedCommand(Command):
+def convert_osc_do_function_to_command_class(func, _osc_instance):
+    class CompatabilityCommand(Command):
         _func = func
         name = _func.__name__[3:]
         aliases = getattr(_func, "aliases", [])
@@ -28,25 +28,25 @@ def convert_osc_do_function_to_command_class(func):
             for option_args, option_kwargs in options:
                 self.parser.add_argument(*option_args, **option_kwargs)
 
-        def run(self, *args):
-            options = getattr(self._func, "options", [])
-            self._func(args, options)
+        def run(self, args):
+            func(args.command, args)
 
-    return CompatabilityWrappedCommand
+    return CompatabilityCommand
 
 
 def get_all_compat_wrapped_commands():
+    _osc_instance = Osc()
     commands = []
-    for name in dir(Osc):
+    for name in dir(_osc_instance):
         if not name.startswith("do_"):
             continue
 
-        func = getattr(Osc, name)
+        func = getattr(_osc_instance, name)
 
-        if not inspect.isfunction(func):
+        if not inspect.ismethod(func):
             continue
 
-        commands.append(convert_osc_do_function_to_command_class(func))
+        commands.append(convert_osc_do_function_to_command_class(func, _osc_instance))
     return commands
 
 
