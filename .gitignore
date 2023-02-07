@@ -40,3 +40,4 @@ venv.bak/
 # Packages, archives
 *.rpm
 *.tar*
+.vscode/launch.json
