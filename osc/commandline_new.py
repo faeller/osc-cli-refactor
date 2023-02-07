@@ -10,6 +10,7 @@ except ImportError:
     argcomplete = None
 
 from . import commands
+from . import cmdln
 
 
 class Command:
@@ -31,10 +32,12 @@ class Command:
         if parent:
             self.parser = self.parent.subparsers.add_parser(
                 self.name, help=self.get_description(), aliases=self.aliases)
-            self.parser.set_defaults(func=self.run)
+            self.parser.set_defaults(func=self.run, formatter_class=cmdln.HelpFormatter,
+                                     usage="%(prog)s [global opts] <command> [--help] [opts] [args]")
         else:
             self.parser = argparse.ArgumentParser(
-                prog=self.name, description=self.get_description())
+                prog=self.name, description=self.get_description(), formatter_class=cmdln.HelpFormatter,
+                usage="%(prog)s [global opts] <command> [--help] [opts] [args]")
             self.add_parser_arguments()
 
     def get_description(self):

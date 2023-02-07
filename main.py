@@ -13,13 +13,17 @@ def main():
     main_command = commandline.OscMainCommand()
     topdir = os.path.dirname(__file__)
     main_command.load_commands()
-    
+
     for legacy_command in compatibility_layer.get_all_compat_wrapped_commands():
         if not legacy_command.name in main_command.commands:
             main_command.register(legacy_command)
 
     main_command.enable_autocomplete()
+    # try:
     args = main_command.parser.parse_args()
+    # except:
+    #     parser.print_help()
+    #     main_command.parser.error("Please specify a command")
     main_command.execute(args)
 
 
