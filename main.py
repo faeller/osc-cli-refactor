@@ -20,7 +20,9 @@ def main():
             main_command.register(legacy_command)
 
     main_command.enable_autocomplete()
-    args = main_command.parser.parse_args()
+    # args = main_command.parser.parse_args()
+    args, unknown_args = main_command.parser.parse_known_args()
+    args.positional_args = list(unknown_args)
     if commandline.debug_mode: args.verbose = True
     main_command.execute(args)
 
