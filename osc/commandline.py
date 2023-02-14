@@ -169,7 +169,6 @@ def pop_project_package_from_args(
 
     if project == ".":
         # project name taken from the working copy
-        project_store = osc_store.Store(path)
         try:
             project_store = osc_store.Store(path)
             project = project_store.project
