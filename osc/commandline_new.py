@@ -11,7 +11,9 @@ except ImportError:
 
 from . import commands
 from . import cmdln
+from .commandline import pop_project_package_from_args
 
+debug_mode = True # is overwritten by main.py, for reasons
 
 class Command:
     """
@@ -93,7 +95,7 @@ class RootCommand(Command):
                 try:
                     spec.loader.exec_module(mod)
                 except Exception as e:  # pylint: disable=broad-except
-                    print(f"Failed to load module {full_name}: {e}")
+                    if debug_mode: print(f"Failed to load module {full_name}: {e}")
                     continue
                 for name in dir(mod):
                     cls = getattr(mod, name)
@@ -119,6 +121,9 @@ class RootCommand(Command):
                     self.root_command.command_classes[mod_cls_name] = cmd
 
     def execute(self, args):
+        if debug_mode:
+            is_compat_command = "CompatabilityCommand" in str(args.func)
+            print(f"CompatabilityCommand={is_compat_command}")
         args.func(args)
 
 

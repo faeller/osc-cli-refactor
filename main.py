@@ -7,6 +7,7 @@ import os
 import osc.commandline_new as commandline
 import osc.commandline_compat_layer as compatibility_layer
 
+commandline.debug_mode = True
 
 def main():
     compatibility_layer.test()
@@ -20,6 +21,7 @@ def main():
 
     main_command.enable_autocomplete()
     args = main_command.parser.parse_args()
+    if commandline.debug_mode: args.verbose = True
     main_command.execute(args)
 
 
