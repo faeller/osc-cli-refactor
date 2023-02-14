@@ -41,3 +41,4 @@ venv.bak/
 *.rpm
 *.tar*
 .vscode/launch.json
+behave/.bashrc
